@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
     <data>       
-        <record id="product_template_pricelist_tree_view" model="ir.ui.view">
-            <field name="name">product.template.pricelist.tree</field>
-            <field name="model">product.template</field>
-            <field name="priority" eval="0"/>
+        <record id="product_product_pricelist_tree_view" model="ir.ui.view">
+            <field name="name">product.product.pricelist.tree</field>
+            <field name="model">product.product</field>
+            <field eval="7" name="priority"/>
             <field name="arch" type="xml">
-                <tree string="Catalog" colors="green:qty_available &gt; 0; red:computed_sale_price &lt; 0; orange:qty_available &lt; 1">
+                <tree string="Product Catalog" colors="green:qty_available &gt; 0; red:computed_sale_price &lt; 0; orange:qty_available &lt; 1">
                     <field name="name"/>
                     <field name="product_brand_id"/>
                     <field name="seller_id"/>
@@ -17,16 +17,29 @@
             </field>
         </record>
         
-        <record model="ir.actions.act_window" id="product_template_pricelist_action">
+        <record id="product_pricelist_normal_action_sell" model="ir.actions.act_window">
             <field name="name">Product Catalog</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="res_model">product.template</field>
+            <field name="res_model">product.product</field>
+            <field name="view_mode">kanban,tree,form</field>
             <field name="view_type">form</field>
-            <field name="view_mode">tree</field>
-            <field name="view_id" ref="product_template_pricelist_tree_view"/>
             <field name="context">{"search_default_filter_to_sell":1}</field>
+            <field name="view_id" ref="product_product_pricelist_tree_view"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Click to define a new product.
+              </p><p>
+                You must define a product for everything you sell, whether it's
+                a physical product, a consumable or a service you offer to
+                customers.
+              </p><p>
+                The product form contains information to simplify the sale
+                process: price, notes in the quotation, accounting data,
+                procurement methods, etc.
+              </p>
+            </field>
         </record>
 
-        <menuitem id="product_pricelist" name="Product Catalog" parent="base.menu_product" action="product_template_pricelist_action" sequence="20"/>
+        <menuitem id="product.menu_product_pricelist" action="product_pricelist_normal_action_sell" parent="base.menu_product" groups="base.group_no_one" sequence="10"/>
     </data>
 </openerp>
