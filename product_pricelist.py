@@ -1,7 +1,7 @@
 from openerp import models, fields, api
 
-class account_next_sequence(models.Model):
-    _inherit = ['product.template']
+class product_product_pricelist(models.Model):
+    _inherit = ['product.product']
     computed_cost_price = fields.Float(compute='_compute_cost_price',string="Cost price", store=False)
     computed_sale_price = fields.Float(compute='_compute_sale_price',string="Sale price", store=False)
     
@@ -55,5 +55,4 @@ class account_next_sequence(models.Model):
                         right_pricelist = val
                 self.computed_sale_price = self.computed_cost_price*(1+right_pricelist.price_discount)+right_pricelist.price_surcharge
         else:
-            self.computed_sale_price = self.list_price
-
+            self.computed_sale_price = self.lst_price
