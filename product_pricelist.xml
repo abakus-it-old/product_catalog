@@ -4,7 +4,7 @@
         <record id="product_product_pricelist_tree_view" model="ir.ui.view">
             <field name="name">product.product.pricelist.tree</field>
             <field name="model">product.product</field>
-            <field eval="7" name="priority"/>
+            <field eval="100" name="priority"/>
             <field name="arch" type="xml">
                 <tree string="Product Catalog" colors="green:qty_available &gt; 0; red:computed_sale_price &lt; 0; orange:qty_available &lt; 1">
                     <field name="name"/>
