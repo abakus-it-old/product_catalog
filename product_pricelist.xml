@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
     <data>       
+        <record id="product_product_pricelist_tree_view" model="ir.ui.view">
+            <field name="name">product.product.pricelist.tree</field>
+            <field name="model">product.product</field>
+            <field eval="100" name="priority"/>
+            <field name="arch" type="xml">
+                <tree string="Product Catalog" colors="green:qty_available &gt; 0; red:computed_sale_price &lt; 0; orange:qty_available &lt; 1">
+                    <field name="name"/>
+                    <field name="product_brand_id"/>
+                    <field name="seller_ids"/>
+                    <field name="computed_cost_price"/>
+                    <field name="computed_sale_price"/>
+                    <field name="qty_available"/>
+                </tree>
+            </field>
+        </record>
+        
         <record id="product_pricelist_normal_action_sell" model="ir.actions.act_window">
             <field name="name">Product Catalog</field>
             <field name="type">ir.actions.act_window</field>
@@ -24,6 +40,6 @@
             </field>
         </record>
 
-        <menuitem id="product.menu_product_pricelist" action="product_pricelist_normal_action_sell" parent="base.menu_product" groups="base.group_no_one" sequence="10"/>
+        <menuitem id="product.menu_product_pricelist" action="product_pricelist_normal_action_sell" parent="base.menu_sales" groups="base.group_no_one" sequence="60"/>
     </data>
 </openerp>

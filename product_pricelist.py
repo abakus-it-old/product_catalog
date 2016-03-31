@@ -7,31 +7,23 @@ class product_product_pricelist(models.Model):
     
     @api.one
     def _compute_cost_price(self):
-        if self.seller_id.id:
-            #-1 for error
-            self.computed_cost_price = -1
-            cr = self.env.cr
-            uid = self.env.user.id
-            obj = self.pool.get('product.supplierinfo')
-            supplier_info = obj.search(cr, uid, [('product_tmpl_id', '=', self.id)])
-            if supplier_info and supplier_info[0]:
-                right_supplier = obj.browse(cr, uid, supplier_info[0])
-                for val in obj.browse(cr, uid, supplier_info):
-                    if val.sequence < right_supplier.sequence:
-                        right_supplier = val
-                pricelist_partnerinfo_obj = self.pool.get('pricelist.partnerinfo')
-                pricelist_partnerinfos = pricelist_partnerinfo_obj.search(cr, uid, [('suppinfo_id', '=', right_supplier.id)])
-                if pricelist_partnerinfos:
-                    if pricelist_partnerinfo_obj.browse(cr, uid, pricelist_partnerinfos[0]).min_quantity == 0:
-                        self.computed_cost_price=pricelist_partnerinfo_obj.browse(cr, uid, pricelist_partnerinfos[0]).price          
-                    else:
-                        self.computed_cost_price=pricelist_partnerinfo_obj.browse(cr, uid, pricelist_partnerinfos[0]).price/pricelist_partnerinfo_obj.browse(cr, uid, pricelist_partnerinfos[0]).min_quantity 
-        else:
-            self.computed_cost_price = self.standard_price
+		cr = self.env.cr
+		uid = self.env.user.id
+
+    	# Product as sellers
+		if len(self.seller_ids) > 0:
+			# get supplier info
+			obj = self.pool.get('product.supplierinfo')
+			supplier_info_ids = obj.search(cr, uid, [('product_tmpl_id', '=', self.product_tmpl_id.id)], order='sequence ASC')
+			if len(supplier_info_ids) > 0:
+				right_supplier = obj.browse(cr, uid, supplier_info_ids[0])
+				self.computed_cost_price = right_supplier.price
+		else:
+			self.computed_cost_price = self.standard_price
     
     @api.one
     def _compute_sale_price(self):
-        if self.seller_id.id:
+        if len(self.seller_ids) > 0:
             #-1 for error
             self.computed_sale_price = -1
             cr = self.env.cr
@@ -43,11 +35,8 @@ class product_product_pricelist(models.Model):
             
             default_pricelist_id = int(ir_property.value_reference[ir_property.value_reference.find(',')+1:]) 
             
-            product_pricelist_version_obj = self.pool.get('product.pricelist.version')
-            product_pricelist_version_id = product_pricelist_version_obj.search(cr, uid, [('pricelist_id', '=', default_pricelist_id),('active','=',True)])          
-           
             obj = self.pool.get('product.pricelist.item')
-            pricelist = obj.search(cr, uid, [('categ_id', '=', self.categ_id.id),('price_version_id','=',product_pricelist_version_id[0])])
+            pricelist = obj.search(cr, uid, [('categ_id', '=', self.categ_id.id),('pricelist_id','=',default_pricelist_id)])
             if pricelist:
                 right_pricelist = obj.browse(cr, uid, pricelist[0])
                 for val in obj.browse(cr, uid, pricelist):
