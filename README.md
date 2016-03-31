@@ -1,3 +1,5 @@
+# Product catalog
+
 This modules adds some functionalities to the contracts for AbAKUS.
 
 It adds a list of products in the sale application with the computed sale price regarding pricelists, supplier prices etc.
