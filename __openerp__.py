@@ -1,6 +1,6 @@
 {
     'name': "Products catalog with prices",
-    'version': '1.0',
+    'version': '9.0.1.0',
     'depends': ['sale', 'product'],
     'author': "Valentin THIRION & Bernard DELHEZ, AbAKUS it-solutions SARL",
     'website': "http://www.abakusitsolutions.eu",
