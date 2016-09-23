@@ -1,45 +1,77 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openerp>
-    <data>       
-        <record id="product_product_pricelist_tree_view" model="ir.ui.view">
-            <field name="name">product.product.pricelist.tree</field>
-            <field name="model">product.product</field>
+    <data>
+        <!-- Add the computed sale price to the product template form -->
+        <record model="ir.ui.view" id="product_template_computed_sale_price">
+			<field name="name">product.template.computed.sale.price</field>
+			<field name="model">product.template</field>
+			<field name="inherit_id" ref="product.product_template_only_form_view"/>
+			<field name="arch" type="xml">
+                <xpath expr="(//field[@name='list_price'])" position="before">
+                    <field name="computed_sale_price" readonly="1" />
+                </xpath>
+			</field>
+		</record>
+
+        <!-- Add the computed sale price to the product product form -->
+        <record model="ir.ui.view" id="product_product_computed_sale_price">
+			<field name="name">product.product.computed.sale.price</field>
+			<field name="model">product.product</field>
+			<field name="inherit_id" ref="product.product_normal_form_view"/>
+			<field name="arch" type="xml">
+                <xpath expr="(//field[@name='lst_price'])" position="before">
+                    <field name="computed_sale_price" readonly="1" />
+                </xpath>
+            </field>
+		</record>
+
+        <record id="product_template_pricelist_tree_view" model="ir.ui.view">
+            <field name="name">product.template.pricelist.tree</field>
+            <field name="model">product.template</field>
             <field eval="100" name="priority"/>
             <field name="arch" type="xml">
                 <tree string="Product Catalog" colors="green:qty_available &gt; 0; red:computed_sale_price &lt; 0; orange:qty_available &lt; 1">
                     <field name="name"/>
                     <field name="product_brand_id"/>
-                    <field name="seller_ids"/>
-                    <field name="computed_cost_price"/>
+                    <field name="suppliers_list"/>
+                    <field name="standard_price"/>
                     <field name="computed_sale_price"/>
                     <field name="qty_available"/>
                 </tree>
             </field>
         </record>
+
+        <!-- Edit the Kanban view from the products with the computed sale price instead of the simple sale price -->
+        <record model="ir.ui.view" id="product_product_computed_sale_price_kanban">
+			<field name="name">product.product.computed.sale.price.kanban</field>
+			<field name="model">product.template</field>
+			<field name="inherit_id" ref="product.product_template_kanban_view"/>
+			<field name="arch" type="xml">
+                <xpath expr="//div[@class='oe_kanban_details']/ul" position="replace">
+                    <ul>
+                        <li>
+                            Price:
+                            <field name="computed_sale_price" widget="monetary" />
+                        </li>
+                        <li>
+                            Cost:
+                            <field name="standard_price" widget="monetary" />
+                        </li>
+                    </ul>
+                </xpath>
+            </field>
+		</record>
         
-        <record id="product_pricelist_normal_action_sell" model="ir.actions.act_window">
+        <record id="product_template_catalog_action" model="ir.actions.act_window">
             <field name="name">Product Catalog</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="res_model">product.product</field>
+            <field name="res_model">product.template</field>
             <field name="view_mode">kanban,tree,form</field>
             <field name="view_type">form</field>
             <field name="context">{"search_default_filter_to_sell":1}</field>
-            <field name="view_id" ref="product_product_pricelist_tree_view"/>
-            <field name="help" type="html">
-              <p class="oe_view_nocontent_create">
-                Click to define a new product.
-              </p><p>
-                You must define a product for everything you sell, whether it's
-                a physical product, a consumable or a service you offer to
-                customers.
-              </p><p>
-                The product form contains information to simplify the sale
-                process: price, notes in the quotation, accounting data,
-                procurement methods, etc.
-              </p>
-            </field>
+            <field name="view_id" ref="product_template_pricelist_tree_view"/>
         </record>
 
-        <menuitem id="product.menu_product_pricelist" action="product_pricelist_normal_action_sell" parent="base.menu_sales" groups="base.group_no_one" sequence="60"/>
+        <menuitem id="product.menu_product_pricelist" action="product_template_catalog_action" parent="base.menu_sales" groups="base.group_sale_salesman" sequence="150"/>
     </data>
 </openerp>

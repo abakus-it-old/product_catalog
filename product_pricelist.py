@@ -1,26 +1,20 @@
 from openerp import models, fields, api
 
-class product_product_pricelist(models.Model):
-    _inherit = ['product.product']
-    computed_cost_price = fields.Float(compute='_compute_cost_price',string="Cost price", store=False)
-    computed_sale_price = fields.Float(compute='_compute_sale_price',string="Sale price", store=False)
-    
-    @api.one
-    def _compute_cost_price(self):
-		cr = self.env.cr
-		uid = self.env.user.id
+class product_template_pricelist(models.Model):
+    _inherit = ['product.template']
+    computed_sale_price = fields.Float(compute='_compute_sale_price', string="Computed sale price")
+    suppliers_list = fields.Char(compute='_computeSuppliersList', string="Suppliers")
 
-    	# Product as sellers
-		if len(self.seller_ids) > 0:
-			# get supplier info
-			obj = self.pool.get('product.supplierinfo')
-			supplier_info_ids = obj.search(cr, uid, [('product_tmpl_id', '=', self.product_tmpl_id.id)], order='sequence ASC')
-			if len(supplier_info_ids) > 0:
-				right_supplier = obj.browse(cr, uid, supplier_info_ids[0])
-				self.computed_cost_price = right_supplier.price
-		else:
-			self.computed_cost_price = self.standard_price
-    
+    @api.one
+    @api.depends('seller_ids')
+    def _computeSuppliersList(self):
+        if len(self.seller_ids) > 0:
+            text = str(len(self.seller_ids)) + " ("
+            for seller in self.seller_ids:
+                text += seller.name.name + ', '
+            text += ")"
+            self.suppliers_list = text
+
     @api.one
     def _compute_sale_price(self):
         if len(self.seller_ids) > 0:
@@ -42,6 +36,16 @@ class product_product_pricelist(models.Model):
                 for val in obj.browse(cr, uid, pricelist):
                     if val.sequence < right_pricelist.sequence:
                         right_pricelist = val
-                self.computed_sale_price = self.computed_cost_price*(1+right_pricelist.price_discount)+right_pricelist.price_surcharge
+                
+                margin = (right_pricelist.price_discount / 100) * -1 # cause it is stored like: 20% margin => '-20%"
+                price = self.standard_price * (1 + margin)
+                price = price + right_pricelist.price_surcharge
+                self.computed_sale_price = price
         else:
             self.computed_sale_price = self.lst_price
+
+class product_product_pricelist(models.Model):
+    _inherit = ['product.product']
+    computed_sale_price = fields.Float(related="product_tmpl_id.computed_sale_price", string="Computed sale price")
+    
+    
